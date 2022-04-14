@@ -1,0 +1,11 @@
+CREATE
+    OR REPLACE TRIGGER trg_logs
+    AFTER INSERT OR DELETE
+    ON EMPLOYEES
+    FOR EACH ROW
+    BEGIN
+        IF INSERTING THEN insert_logs(:new.FIRST_NAME,LAST_NAME,'HIRED');
+        END IF;
+        IF DELETING THEN insert_logs(:old.FIRST_NAME,LAST_NAME,'FIRED');
+        END IF;
+    end;
