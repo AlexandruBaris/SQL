@@ -5,23 +5,28 @@ FROM employees
          LEFT JOIN jobs USING (job_id);
 
 -- 2. the first and last name, department, city, and state province for each employee.
-SELECT first_name, last_name, department_name, city, state_province
-FROM employees
-         LEFT JOIN departments using (department_id)
-         LEFT JOIN locations using (location_id);
+SELECT A.first_name, A.last_name, B.department_name, C.city, C.state_province
+FROM employees A
+         JOIN DEPARTMENTS B
+            ON A.DEPARTMENT_ID = B.DEPARTMENT_ID
+                JOIN LOCATIONS C
+                    ON B.LOCATION_ID = C.LOCATION_ID;
 
 -- 3. the first name, last name, department number and department name, for all employees for departments 80 or 40.
-SELECT first_name, last_name, department_id, department_name
-FROM employees
-         LEFT JOIN departments USING (DEPARTMENT_ID)
-WHERE DEPARTMENT_ID = 40 OR DEPARTMENT_ID = 80;
+SELECT A.first_name, A.last_name, A.department_id, B.department_name
+FROM employees A
+          JOIN departments B
+            ON A.DEPARTMENT_ID = B.DEPARTMENT_ID
+                AND A.DEPARTMENT_ID IN(80,40);
 
 -- 4. those employees who contain a letter z to their first name and also display their last name, department, city, and state province.
-SELECT FIRST_NAME,LAST_NAME,DEPARTMENT_NAME,CITY,STATE_PROVINCE
-FROM EMPLOYEES
-         LEFT JOIN DEPARTMENTS D on EMPLOYEES.EMPLOYEE_ID = D.MANAGER_ID
-         LEFT JOIN LOCATIONS L on D.LOCATION_ID = L.LOCATION_ID
-WHERE FIRST_NAME LIKE '%z%';
+SELECT A.FIRST_NAME,A.LAST_NAME,B.DEPARTMENT_NAME,C.CITY,C.STATE_PROVINCE
+FROM EMPLOYEES A
+         JOIN DEPARTMENTS B on
+             A.DEPARTMENT_ID = B.DEPARTMENT_ID
+                 JOIN LOCATIONS C
+                     on B.LOCATION_ID = C.LOCATION_ID
+                        WHERE FIRST_NAME LIKE '%z%';
 
 -- 5. the first and last name and salary for those employees who earn less than the employee earn whose number is 182.
 SELECT FIRST_NAME, LAST_NAME, SALARY
@@ -34,9 +39,11 @@ FROM EMPLOYEES A
          JOIN EMPLOYEES B ON A.MANAGER_ID = B.MANAGER_ID;
 
 -- 7. the first name of all employees and the first name of their manager including those who does not working under any manager.
-SELECT A.FIRST_NAME AS "EMPLOYEE NAME", B.FIRST_NAME AS "Manager"
-FROM EMPLOYEES A
-         LEFT OUTER JOIN EMPLOYEES B ON A.MANAGER_ID = B.MANAGER_ID;
+SELECT A.first_name AS "Employee Name",
+       B.first_name AS "Manager"
+FROM employees A
+         JOIN employees B
+              ON A.manager_id = B.employee_id;
 
 -- 8. the details of employees who manage a department.
 SELECT *
@@ -57,10 +64,10 @@ FROM DEPARTMENTS
 GROUP BY EMPLOYEES.DEPARTMENT_ID, DEPARTMENT_NAME;
 
 --11. the name of the department, average salary and number of employees working in that department who got commission.
-SELECT DEPARTMENT_NAME, AVG(SALARY),COUNT(COMMISSION_PCT)
-FROM DEPARTMENTS
-         JOIN EMPLOYEES USING (DEPARTMENT_ID)
-GROUP BY DEPARTMENT_NAME;
+SELECT A.DEPARTMENT_NAME, AVG(B.SALARY),COUNT(COMMISSION_PCT)
+FROM EMPLOYEES B
+         JOIN DEPARTMENTS A ON B.DEPARTMENT_ID = A.DEPARTMENT_ID
+GROUP BY A.DEPARTMENT_NAME;
 
 --12. job title and average salary of employees.
 SELECT JOB_TITLE, AVG(SALARY)
@@ -126,8 +133,7 @@ FROM EMPLOYEES
 WHERE DEPARTMENT_ID NOT IN(
     SELECT DEPARTMENT_ID
     FROM DEPARTMENTS
-    WHERE EMPLOYEES.MANAGER_ID BETWEEN 100 AND 200
-);
+    WHERE EMPLOYEES.MANAGER_ID BETWEEN 100 AND 200);
 
 --22. all the information for those employees whose id is any id who earn the second highest salary.
 SELECT *
